@@ -1,22 +1,39 @@
 services:
-  db:   # Service name (you can call it anything, here it's "db")
-    container_name: postgres  # The container will be named "postgres"
-    image: postgres:latest    # Use the official Postgres image from Docker Hub
-    environment:              # Environment variables (like configs)
-      POSTGRES_USER: admin    # Username for the database
-      POSTGRES_PASSWORD: password    # Password for the database
-      PGDATA: /data/postgres         # Location inside the container where data will be stored
-    volumes:                 # Volumes = store data persistently
-      - db:/data/postgres    # Maps volume "db" to container path "/data/postgres"
+  # PostgreSQL service
+  db:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      PGDATA: /data/postgres
+    volumes:
+      - db:/data/postgres
     ports:
-      - "5332:5432"          # Maps host port 5332 → container port 5432
+      - "5332:5432"
     networks:
-      - db                   # Connects container to "db" network
-    restart: unless-stopped  # Restart policy → container auto-restarts unless manually stopped
+      - db
+    restart: unless-stopped
+
+  # Keycloak service added
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:22.0.5
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME_STRICT: false
+    ports:
+      - "9080:8080"
+    networks:
+      - db
+    restart: unless-stopped
+    command: start-dev
 
 networks:
-  db:                        # Define a custom network named "db"
-    driver: bridge           # Uses "bridge" networking mode (default)
+  db:
+    driver: bridge
 
 volumes:
-  db:                        # Define a named volume "db"
+  db:
