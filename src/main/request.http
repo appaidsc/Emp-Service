@@ -28,6 +28,12 @@ Content-Type: application/json
 }
 
 ###
+# curl http://localhost:9080/realms/Test_admin/.well-known/openid-configuration
+GET http://localhost:9080/realms/Test_admin/.well-known/openid-configuration
+
+###
+
+
 
 
 
