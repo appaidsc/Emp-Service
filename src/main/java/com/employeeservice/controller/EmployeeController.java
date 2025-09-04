@@ -79,6 +79,11 @@ public class EmployeeController {
             return ResponseEntity.status(404).body("ID not found");
         }
     }
+    // POST: Batch insert employees
+    @PostMapping("/batch")
+    public List<Employee> addEmployees(@RequestBody List<Employee> employees) {
+        return employeeService.saveAll(employees);
+    }
 
 
 }

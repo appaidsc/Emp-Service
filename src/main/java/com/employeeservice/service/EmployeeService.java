@@ -42,4 +42,7 @@ public class EmployeeService {
         employeeRepository.deleteById(id);
     }
 
+    public List<Employee> saveAll(List<Employee> employees) {
+        return employeeRepository.saveAll(employees);
+    }
 }
