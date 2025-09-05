@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL service (your existing configuration)
   db:
@@ -28,6 +26,8 @@ services:
       KC_HOSTNAME_STRICT: 'false'
     ports:
       - "9080:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
     networks:
       - app-network # Changed to the shared network
     restart: unless-stopped
@@ -58,5 +58,6 @@ networks:
 
 # Define the named volume for persistent database storage
 volumes:
-  db_data: # Renamed for clarity
+  db_data:
+  keycloak_data:
 
