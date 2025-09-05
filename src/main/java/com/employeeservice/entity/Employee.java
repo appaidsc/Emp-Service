@@ -1,79 +1,219 @@
+//package com.employeeservice.entity;
+//
+//import jakarta.persistence.Entity;
+//import jakarta.persistence.GeneratedValue;
+//import jakarta.persistence.GenerationType;
+//import jakarta.persistence.Id;
+//import jdk.jfr.Enabled;
+//
+//import java.util.Objects;
+//@Entity
+//public class Employee {
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private long id;
+//    private String name;
+//    private String department;
+//    private String role;
+//
+//    public Employee() {};
+//
+//    public Employee(int i, String s, String engineering, String sde) {
+//        this.id = i;
+//        this.name = s;
+//        this.department = engineering;
+//        this.role = sde;
+//    }
+//
+//
+//    public long getId() {
+//        return id;
+//    }
+//
+//    public void setId(long id)
+//    {
+//        this.id = id;
+//    }
+//
+//    public String getName()
+//    {
+//        return name;
+//    }
+//
+//    public void setName(String name) {
+//
+//        this.name = name;
+//    }
+//
+//    public String getDepartment()
+//    {
+//        return department;
+//    }
+//
+//    public void setDepartment(String department)
+//    {
+//        this.department = department;
+//    }
+//
+//    public String getRole()
+//    {
+//        return role;
+//    }
+//
+//    @Override
+//    public boolean equals(Object o) {
+//        if (o == null || getClass() != o.getClass()) return false;
+//        Employee employee = (Employee) o;
+//        return id == employee.id && Objects.equals(name, employee.name) && Objects.equals(department, employee.department) && Objects.equals(role, employee.role);
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        return Objects.hash(id, name, department, role);
+//    }
+//
+//    public void setRole(String role)
+//    {
+//        this.role = role;
+//    }
+//}
+
+
 package com.employeeservice.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jdk.jfr.Enabled;
+import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.UUID;
+
 @Entity
+@Table (name = "employee")
 public class Employee {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-    private String name;
-    private String department;
-    private String role;
+    @GeneratedValue ( strategy = GenerationType.AUTO)
+    private UUID id;
 
-    public Employee() {};
+    private String firstName;
 
-    public Employee(int i, String s, String engineering, String sde) {
-        this.id = i;
-        this.name = s;
-        this.department = engineering;
-        this.role = sde;
-    }
+    private String lastName;
 
+    private String email;
 
-    public long getId() {
+    private String phoneNumber;
+
+    private String city;
+
+    private String state;
+
+    private String pinCode;
+
+    private String country;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
+
+    private BigDecimal salary;
+
+    public UUID getId() {
         return id;
     }
 
-    public void setId(long id)
-    {
+    public void setId(UUID id) {
         this.id = id;
     }
 
-    public String getName()
-    {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setName(String name) {
-
-        this.name = name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getDepartment()
-    {
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getPinCode() {
+        return pinCode;
+    }
+
+    public void setPinCode(String pinCode) {
+        this.pinCode = pinCode;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public Department getDepartment() {
         return department;
     }
 
-    public void setDepartment(String department)
-    {
+    public void setDepartment(Department department) {
         this.department = department;
     }
 
-    public String getRole()
-    {
-        return role;
+    public BigDecimal getSalary() {
+        return salary;
+    }
+
+    public void setSalary(BigDecimal salary) {
+        this.salary = salary;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Employee employee = (Employee) o;
-        return id == employee.id && Objects.equals(name, employee.name) && Objects.equals(department, employee.department) && Objects.equals(role, employee.role);
+        return Objects.equals(id, employee.id) && Objects.equals(firstName, employee.firstName) && Objects.equals(lastName, employee.lastName) && Objects.equals(email, employee.email) && Objects.equals(phoneNumber, employee.phoneNumber) && Objects.equals(city, employee.city) && Objects.equals(state, employee.state) && Objects.equals(pinCode, employee.pinCode) && Objects.equals(country, employee.country) && Objects.equals(department, employee.department) && Objects.equals(salary, employee.salary);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, department, role);
-    }
-
-    public void setRole(String role)
-    {
-        this.role = role;
+        return Objects.hash(id, firstName, lastName, email, phoneNumber, city, state, pinCode, country, department, salary);
     }
 }
+
