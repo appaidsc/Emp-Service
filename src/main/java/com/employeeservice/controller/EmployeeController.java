@@ -1,17 +1,15 @@
 package com.employeeservice.controller;
 
 
-
 import com.employeeservice.entity.Employee;
 import com.employeeservice.service.EmployeeService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity; // new line
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/employees")
@@ -21,69 +19,49 @@ public class EmployeeController {
     public EmployeeController(EmployeeService employeeService) {
         this.employeeService = employeeService;
     }
-    @PreAuthorize("hasRole('EMPLOYEE_READ') or hasRole('EMPLOYEE_WRITE')")
-    @GetMapping("/get")
-    public List<Employee> getEmployees(){
-        return employeeService.getEmployees();
-    }
 
-
-    // Create
-    @PreAuthorize("hasRole('EMPLOYEE_WRITE')")
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Employee createEmployee(@RequestBody Employee employee) {
-        return employeeService.insertEmployee(employee);
-    }
-
-    // Read All
-    @PreAuthorize("hasRole('EMPLOYEE_READ') or hasRole('EMPLOYEE_WRITE')")
-    @GetMapping("/")
+    @GetMapping
     public List<Employee> getAllEmployees() {
         return employeeService.getEmployees();
     }
 
-    // Read One
-    @PreAuthorize("hasRole('EMPLOYEE_READ') or hasRole('EMPLOYEE_WRITE')")
     @GetMapping("/{id}")
-    public ResponseEntity<?> getEmployeeById(@PathVariable Long id) {
-        try {
-            Employee employee = employeeService.getEmployeeById(id);
-            return ResponseEntity.ok(employee);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body("ID not found");
-        }
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable UUID id) {
+        return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
 
-    // Update
-    @PreAuthorize("hasRole('EMPLOYEE_WRITE')")
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateEmployee(@PathVariable Long id,
-                                   @RequestBody Employee employee) {
-        try {
-            Employee updatedEmployee = employeeService.updateEmployee(id, employee);
-            return ResponseEntity.ok(updatedEmployee);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body("ID not found");
-        }
+    // Endpoint for creating a new employee (typically for HR/Director)
+    @PostMapping
+    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
+        return ResponseEntity.ok(employeeService.createEmployee(employee));
     }
 
-    // Delete
-    @PreAuthorize("hasRole('EMPLOYEE_WRITE')")
+    // Endpoint for an employee to update their own personal info (not salary or department)
+    @PutMapping("/{id}/personal-info")
+    public ResponseEntity<Employee> updatePersonalInfo(@PathVariable UUID id, @RequestBody Employee employeeDetails) {
+        return ResponseEntity.ok(employeeService.updatePersonalInfo(id, employeeDetails));
+    }
+
+    // Endpoint specifically for updating salary (for Accounts Manager/Director)
+    @PutMapping("/{id}/salary")
+    public ResponseEntity<Employee> updateEmployeeSalary(@PathVariable UUID id, @RequestBody Map<String, BigDecimal> payload) {
+        BigDecimal newSalary = payload.get("salary");
+        if (newSalary == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(employeeService.updateEmployeeSalary(id, newSalary));
+    }
+
+    // Endpoint for assigning an employee to a new department (for HR/Director)
+    @PutMapping("/{employeeId}/department/{departmentId}")
+    public ResponseEntity<Employee> assignDepartment(@PathVariable UUID employeeId, @PathVariable UUID departmentId) {
+        return ResponseEntity.ok(employeeService.assignEmployeeToDepartment(employeeId, departmentId));
+    }
+
+    // Endpoint for deleting an employee (typically for Director)
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteEmployee(@PathVariable Long id) {
-        try {
-            employeeService.getEmployeeById(id); // Throws if not found
-            employeeService.deleteEmployee(id);
-            return ResponseEntity.ok().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body("ID not found");
-        }
+    public ResponseEntity<Void> deleteEmployee(@PathVariable UUID id) {
+        employeeService.deleteEmployee(id);
+        return ResponseEntity.noContent().build();
     }
-    // POST: Batch insert employees
-    @PostMapping("/batch")
-    public List<Employee> addEmployees(@RequestBody List<Employee> employees) {
-        return employeeService.saveAll(employees);
-    }
-
-
 }
