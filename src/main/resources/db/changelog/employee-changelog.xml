@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="2-create-employee" author="you">
+        <createTable tableName="employee">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)"/>
+            <column name="last_name" type="VARCHAR(255)"/>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="phone_number" type="VARCHAR(50)"/>
+            <column name="city" type="VARCHAR(100)"/>
+            <column name="state" type="VARCHAR(100)"/>
+            <column name="pin_code" type="VARCHAR(20)"/>
+            <column name="country" type="VARCHAR(100)"/>
+            <column name="salary" type="DECIMAL(15,2)"/>
+            <column name="department_id" type="UUID"/>
+        </createTable>
+
+        <!-- Add foreign key -->
+        <addForeignKeyConstraint
+                baseTableName="employee"
+                baseColumnNames="department_id"
+                constraintName="fk_employee_department"
+                referencedTableName="department"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>
