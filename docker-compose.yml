@@ -1,5 +1,7 @@
+version: '3.8'
+
 services:
-  # PostgreSQL service
+  # PostgreSQL service (your existing configuration)
   db:
     container_name: postgres
     image: postgres:latest
@@ -8,32 +10,53 @@ services:
       POSTGRES_PASSWORD: password
       PGDATA: /data/postgres
     volumes:
-      - db:/data/postgres
+      - db_data:/data/postgres # Using a named volume for better management
     ports:
       - "5332:5432"
     networks:
-      - db
+      - app-network # Changed to the shared network
     restart: unless-stopped
 
-  # Keycloak service added new
+  # Keycloak service (your existing configuration)
   keycloak:
     container_name: keycloak
     image: quay.io/keycloak/keycloak:22.0.5
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HTTP_ENABLED: true
-      KC_HOSTNAME_STRICT: false
+      KC_HTTP_ENABLED: 'true'
+      KC_HOSTNAME_STRICT: 'false'
     ports:
       - "9080:8080"
     networks:
-      - db
+      - app-network # Changed to the shared network
     restart: unless-stopped
     command: start-dev
 
+  # --- NEW SERVICE ---
+  # Open Policy Agent (OPA) Service
+  opa:
+    image: openpolicyagent/opa:latest
+    container_name: opa
+    ports:
+      - "8181:8181"
+    volumes:
+      - ./policies:/policies # Mounts your local policies directory
+    networks:
+      - app-network # Added to the shared network
+    command:
+      - "run"
+      - "--server"
+      - "--watch" # Automatically reloads policies on change
+      - "/policies"
+    restart: unless-stopped
+
+# Define the shared network for all services
 networks:
-  db:
+  app-network:
     driver: bridge
 
+# Define the named volume for persistent database storage
 volumes:
-  db:
+  db_data: # Renamed for clarity
+
