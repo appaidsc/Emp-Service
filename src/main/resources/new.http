@@ -1,0 +1,119 @@
+###
+
+# curl http://localhost:8181/v1/policies
+GET http://localhost:8181/v1/policies
+
+###
+
+# curl -X POST http://localhost:8181/v1/data/emp_service/authz/allow
+#  -H "Content-Type: application/json"
+#  -d '{
+#    "input": {
+#      "method": "POST",
+#      "path": ["api","v1","departments"],
+#      "user": {
+#        "roles": ["DIRECTOR"],
+#        "employeeId": "dcd5e148-4a81-46f5-bb36-aeb73edd72c8",
+#        "department": "Management"
+#      }
+#    }
+#  }'
+POST http://localhost:8181/v1/data/emp_service/authz/allow
+Content-Type: application/json
+
+{
+  "input": {
+    "method": "POST",
+    "path": [
+      "api",
+      "v1",
+      "departments"
+    ],
+    "user": {
+      "roles": [
+        "DIRECTOR"
+      ],
+      "employeeId": "dcd5e148-4a81-46f5-bb36-aeb73edd72c8",
+      "department": "Management"
+    }
+  }
+}
+
+###
+# curl http://localhost:8181/health
+GET http://localhost:8181/health
+
+###
+
+# curl http://localhost:8181/health
+GET http://localhost:8181/health
+
+###
+# curl http://localhost:8181/v1/policies
+GET http://localhost:8181/v1/policies
+
+###
+# curl -v http://localhost:8181/
+GET http://localhost:8181/
+
+###
+
+
+# curl http://localhost:8181/v1/data/emp_service/authz/allow
+GET http://localhost:8181/v1/data/emp_service/authz/allow
+
+###
+# curl http://localhost:8181/v1/policies
+GET http://localhost:8181/v1/policies
+
+###
+GET http://localhost:8181/v1/data
+
+###
+# curl -X POST http://localhost:8181/v1/data/emp_service/authz/allow
+#  -H "Content-Type: application/json"
+#  -d '{
+#    "input": {
+#      "method": "POST",
+#      "path": ["api", "v1", "departments"],
+#      "user": {
+#        "roles": ["DIRECTOR"],
+#        "employeeId": "DIR001",
+#        "username": "director@company.com"
+#      }
+#    }
+#  }'
+POST http://localhost:8181/v1/data/emp_service/authz/allow
+Content-Type: application/json
+
+{
+  "input": {
+    "method": "POST",
+    "path": [
+      "api",
+      "v1",
+      "departments"
+    ],
+    "user": {
+      "roles": [
+        "DIRECTOR"
+      ],
+      "employeeId": "DIR001",
+      "username": "director@company.com"
+    }
+  }
+}
+
+###
+
+
+
+
+
+###
+
+
+
+
+
+

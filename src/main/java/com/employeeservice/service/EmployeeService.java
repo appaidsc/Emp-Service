@@ -3,6 +3,7 @@ package com.employeeservice.service;
 
 import com.employeeservice.entity.Department;
 import com.employeeservice.entity.Employee;
+import com.employeeservice.exception.ResourceNotFoundException;
 import com.employeeservice.repository.EmployeeRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -73,6 +74,9 @@ public class EmployeeService {
 
     @Transactional
     public void deleteEmployee(UUID id){
+        if(!employeeRepository.existsById(id)){
+            throw new ResourceNotFoundException("Employee with id " + id + " not found");
+        }
         employeeRepository.deleteById(id);
     }
 

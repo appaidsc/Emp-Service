@@ -1,7 +1,9 @@
 package com.employeeservice.service;
 
 import com.employeeservice.entity.Department;
-import com.employeeservice.repository.DepartmentRepositary;
+import com.employeeservice.exception.ResourceNotFoundException;
+import com.employeeservice.repository.DepartmentRepository;
+import com.employeeservice.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,36 +12,49 @@ import java.util.UUID;
 @Service
 public class DepartmentService {
 
-    private final DepartmentRepositary departmentRepositary;
+    private final DepartmentRepository departmentRepository;
+    private final EmployeeRepository employeeRepository;
 
-    public DepartmentService(DepartmentRepositary departmentRepositary) {
-        this.departmentRepositary = departmentRepositary;
+    public DepartmentService(DepartmentRepository departmentRepository, EmployeeRepository employeeRepository) {
+        this.departmentRepository = departmentRepository;
+        this.employeeRepository = employeeRepository;
+
     }
 
     public List<Department> getAllDepartments() {
-        return departmentRepositary.findAll();
+        return departmentRepository.findAll();
     }
 
     public Department getDepartmentById(UUID id) {
-        return departmentRepositary.findById(id)
+        return departmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Department with id " + id + " not found!"));
     }
 
     public Department createDepartment(Department department) {
         // Brother need to check if the deparment is present
-        return departmentRepositary.save(department);
+        departmentRepository.findByName(department.getName()).ifPresent(d ->{
+            throw new RuntimeException("Department with name " + department.getName() + " already exists!");
+        });
+        return departmentRepository.save(department);
     }
 
     public Department updateDepartment(UUID id, Department departmentDetails) {
         Department existingDepartment = getDepartmentById(id);
         existingDepartment.setName(departmentDetails.getName());
-        return departmentRepositary.save(existingDepartment);
+        return departmentRepository.save(existingDepartment);
     }
     public void deleteDepartment(UUID id) {
-        boolean hasEmployee = departmentRepositary.existsById(id);
-        if (hasEmployee) {
-            throw new IllegalStateException("Cannot delete department with employees assigned.");
+        // First, ensure the department exists
+        if (!departmentRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Department with id " + id + " not found!");
         }
-        departmentRepositary.deleteById(id);
+
+        // Check if any employee is linked to this department
+        boolean hasEmployees = employeeRepository.existsByDepartmentId(id);
+        if (hasEmployees) {
+            throw new IllegalStateException("Cannot delete department: Employees are still assigned to it.");
+        }
+        departmentRepository.deleteById(id);
     }
+
 }
