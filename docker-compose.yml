@@ -36,20 +36,29 @@ services:
   # --- NEW SERVICE ---
   # Open Policy Agent (OPA) Service
   opa:
-    image: openpolicyagent/opa:latest
     container_name: opa
+    build:
+      context: .
+      dockerfile: ./opa/Dockerfile
     ports:
       - "8181:8181"
-    volumes:
-      - ./policies:/policies # Mounts your local policies directory
     networks:
-      - app-network # Added to the shared network
+      - app-network
     command:
       - "run"
       - "--server"
-      - "--watch" # Automatically reloads policies on change
+      - "--addr=0.0.0.0:8181"  # Bind to all interfaces
+      - "--watch"
+      - "--log-level=debug"
+      - "--log-format=json-pretty"
       - "/policies"
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8181/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
 # Define the shared network for all services
 networks:

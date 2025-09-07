@@ -36,10 +36,11 @@ public class DepartmentController {
     }
 
     @PutMapping("/{id}")
-    public Department updateDepartment(
+    public ResponseEntity<Department> updateDepartment(
             @PathVariable UUID id,
             @RequestBody Department departmentDetails) {
-        return departmentService.updateDepartment(id, departmentDetails);
+        Department updatedDepartment = departmentService.updateDepartment(id, departmentDetails);
+        return ResponseEntity.ok(updatedDepartment);
     }
 
     @DeleteMapping("/{id}")
@@ -47,4 +48,6 @@ public class DepartmentController {
         departmentService.deleteDepartment(id);
         return ResponseEntity.noContent().build();
     }
+
+
 }

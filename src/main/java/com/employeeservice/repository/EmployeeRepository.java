@@ -7,4 +7,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
+    boolean existsByDepartmentId(UUID departmentId);
 }

@@ -1,11 +1,13 @@
 package com.employeeservice.repository;
 
 import com.employeeservice.entity.Department;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
 import java.util.UUID;
 
-public interface DepartmentRepositary extends JpaRepository<Department, UUID> {
-    boolean existsDepartmentById(UUID id);
+public interface DepartmentRepository extends JpaRepository<Department, UUID> {
+    Optional<Department> findByName(String name);
 
 }
