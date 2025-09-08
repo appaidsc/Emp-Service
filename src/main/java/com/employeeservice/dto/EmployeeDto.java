@@ -1,41 +1,20 @@
-package com.employeeservice.entity;
-
-import jakarta.persistence.*;
+package com.employeeservice.dto;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 import java.util.UUID;
 
-@Entity
-@Table (name = "employee")
-public class Employee {
-    @Id
-    @GeneratedValue ( strategy = GenerationType.AUTO)
+public class EmployeeDto {
+
     private UUID id;
-
     private String firstName;
-
     private String lastName;
-
     private String email;
-
     private String phoneNumber;
-
     private String city;
-
     private String state;
-
-    private String pinCode;
-
     private String country;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "department_id")
-    private Department department;
-
     private BigDecimal salary;
-
-    public Employee(){};
+    private DepartmentDto department;
 
     public UUID getId() {
         return id;
@@ -93,28 +72,12 @@ public class Employee {
         this.state = state;
     }
 
-    public String getPinCode() {
-        return pinCode;
-    }
-
-    public void setPinCode(String pinCode) {
-        this.pinCode = pinCode;
-    }
-
     public String getCountry() {
         return country;
     }
 
     public void setCountry(String country) {
         this.country = country;
-    }
-
-    public Department getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(Department department) {
-        this.department = department;
     }
 
     public BigDecimal getSalary() {
@@ -125,17 +88,11 @@ public class Employee {
         this.salary = salary;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Employee employee = (Employee) o;
-        return Objects.equals(id, employee.id) && Objects.equals(firstName, employee.firstName) && Objects.equals(lastName, employee.lastName) && Objects.equals(email, employee.email) && Objects.equals(phoneNumber, employee.phoneNumber) && Objects.equals(city, employee.city) && Objects.equals(state, employee.state) && Objects.equals(pinCode, employee.pinCode) && Objects.equals(country, employee.country) && Objects.equals(department, employee.department) && Objects.equals(salary, employee.salary);
+    public DepartmentDto getDepartment() {
+        return department;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, firstName, lastName, email, phoneNumber, city, state, pinCode, country, department, salary);
+    public void setDepartment(DepartmentDto department) {
+        this.department = department;
     }
-
 }
-

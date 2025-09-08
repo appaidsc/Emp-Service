@@ -5,6 +5,8 @@ import com.employeeservice.entity.Employee;
 import com.employeeservice.service.EmployeeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.employeeservice.dto.DepartmentDto;
+import com.employeeservice.dto.EmployeeDto;
 
 import java.math.BigDecimal;
 import java.util.List;
