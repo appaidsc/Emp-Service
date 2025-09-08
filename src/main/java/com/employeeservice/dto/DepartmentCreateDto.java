@@ -1,14 +1,9 @@
 package com.employeeservice.dto;
 
-import java.util.UUID;
-
-public class DepartmentDto {
-    private UUID id;
+public class DepartmentCreateDto {
     private String name;
 
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-
+    // Getters and setters
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 }
