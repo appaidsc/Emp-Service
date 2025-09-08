@@ -1,7 +1,9 @@
 package com.employeeservice.service;
 
+import com.employeeservice.dto.DepartmentCreateDto;
 import com.employeeservice.entity.Department;
 import com.employeeservice.exception.ResourceNotFoundException;
+import com.employeeservice.mapper.DepartmentMapper;
 import com.employeeservice.repository.DepartmentRepository;
 import com.employeeservice.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,6 @@ public class DepartmentService {
     public DepartmentService(DepartmentRepository departmentRepository, EmployeeRepository employeeRepository) {
         this.departmentRepository = departmentRepository;
         this.employeeRepository = employeeRepository;
-
     }
 
     public List<Department> getAllDepartments() {
@@ -31,30 +32,27 @@ public class DepartmentService {
     }
 
     public Department createDepartment(Department department) {
-        // Brother need to check if the deparment is present
-        departmentRepository.findByName(department.getName()).ifPresent(d ->{
+        departmentRepository.findByName(department.getName()).ifPresent(d -> {
             throw new RuntimeException("Department with name " + department.getName() + " already exists!");
         });
         return departmentRepository.save(department);
     }
 
-    public Department updateDepartment(UUID id, Department departmentDetails) {
+    public Department updateDepartment(UUID id, DepartmentCreateDto departmentDetails) {
         Department existingDepartment = getDepartmentById(id);
-        existingDepartment.setName(departmentDetails.getName());
+        DepartmentMapper.updateEntityFromDto(existingDepartment, departmentDetails);
         return departmentRepository.save(existingDepartment);
     }
+
     public void deleteDepartment(UUID id) {
-        // First, ensure the department exists
         if (!departmentRepository.existsById(id)) {
             throw new ResourceNotFoundException("Department with id " + id + " not found!");
         }
 
-        // Check if any employee is linked to this department
         boolean hasEmployees = employeeRepository.existsByDepartmentId(id);
         if (hasEmployees) {
             throw new IllegalStateException("Cannot delete department: Employees are still assigned to it.");
         }
         departmentRepository.deleteById(id);
     }
-
 }
