@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
+public interface EmployeeRepository extends JpaRepository<Employee, UUID>, EmployeeRepositoryCustom {
     boolean existsByDepartmentId(UUID departmentId);
     Optional<Employee> findByDepartmentId(UUID departmentId);
 }

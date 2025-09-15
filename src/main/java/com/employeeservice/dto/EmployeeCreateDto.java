@@ -15,6 +15,16 @@ public class EmployeeCreateDto {
     private BigDecimal salary;
     private UUID departmentId;
 
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
+
+    private String departmentName;
+
     // Getters and setters
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }

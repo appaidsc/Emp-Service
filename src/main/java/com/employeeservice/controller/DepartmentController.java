@@ -8,6 +8,7 @@ import com.employeeservice.service.DepartmentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,10 +38,21 @@ public class DepartmentController {
 
     @PostMapping
     public ResponseEntity<DepartmentResponseDto> createDepartment(@RequestBody DepartmentCreateDto departmentDto) {
+        // Convert DTO → entity
         Department department = DepartmentMapper.fromCreateDto(departmentDto);
+
+        // Save department
         Department savedDepartment = departmentService.createDepartment(department);
-        return ResponseEntity.ok(DepartmentMapper.toResponseDto(savedDepartment));
+
+        // Build location URI (assumes you have GET /departments/{id})
+        URI location = URI.create(String.format("/departments/%s", savedDepartment.getId()));
+
+        // Return 201 Created + Location header + response body
+        return ResponseEntity
+                .created(location)
+                .body(DepartmentMapper.toResponseDto(savedDepartment));
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<DepartmentResponseDto> updateDepartment(
