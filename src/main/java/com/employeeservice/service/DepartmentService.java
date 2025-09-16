@@ -55,4 +55,8 @@ public class DepartmentService {
         }
         departmentRepository.deleteById(id);
     }
+
+    public Department getDepartmentByName(String departmentName) {
+        return departmentRepository.findByName(departmentName).orElseThrow(() ->  new ResourceNotFoundException("Department with name " + departmentName + " already exists!"));
+    }
 }

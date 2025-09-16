@@ -1,5 +1,6 @@
 package com.employeeservice.service;
 
+import com.employeeservice.dto.EmployeeCreateDto;
 import com.employeeservice.dto.EmployeePersonalUpdateDto;
 import com.employeeservice.entity.Department;
 import com.employeeservice.entity.Employee;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class EmployeeService {
@@ -70,5 +72,73 @@ public class EmployeeService {
             throw new ResourceNotFoundException("Employee with id " + id + " not found");
         }
         employeeRepository.deleteById(id);
+    }
+
+    public List<Employee> searchEmployees(String firstName, String lastName , UUID departmentId) {
+        return employeeRepository.searchByCriteria(firstName, lastName, departmentId);
+    }
+
+    public Employee getEmployeeByEmail(String email) {
+        return employeeRepository.findByEmail(email)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Employee with email " + email + " not found"));
+    }
+
+    public List<Employee> findEmployeeBySalaryRange(BigDecimal minSalary, BigDecimal maxSalary) {
+        return employeeRepository.findBySalaryRange(minSalary, maxSalary);
+    }
+
+    public List<Employee> findEmployeesComplex(String email, String firstName, String lastName) {
+        // Handle cases where parameters might be missing, if necessary
+        if (email == null || firstName == null || lastName == null) {
+            // Depending on requirements, you could throw an exception or return an empty list
+            throw new IllegalArgumentException("All parameters (email, firstName, lastName) are required for this search.");
+        }
+        return employeeRepository.findComplex(email, firstName, lastName);
+    }
+
+    @Transactional
+    public Employee createEmployee(Employee employee, EmployeeCreateDto employeeDto) {
+        Department department = null;
+
+        // Priority 1: Check for Department ID
+        if (employeeDto.getDepartmentId() != null) {
+            department = departmentService.getDepartmentById(employeeDto.getDepartmentId());
+        }
+        // Priority 2: Check for Department Name
+        else if (employeeDto.getDepartmentName() != null && !employeeDto.getDepartmentName().isEmpty()) {
+            department = departmentService.getDepartmentByName(employeeDto.getDepartmentName());
+        }
+
+        employee.setDepartment(department);
+        return employeeRepository.save(employee);
+    }
+
+    @Transactional
+    public List<Employee> bulkCreateEmployees(List<EmployeeCreateDto> employeeDtos) {
+        List<Employee> employeesToSave = employeeDtos.stream()
+                .map(dto -> {
+                    // Reuse the existing mapping and department logic
+                    Employee employee = EmployeeMapper.fromCreateDto(dto);
+
+                    Department department = null;
+                    // Priority 1: Check for Department ID
+                    if (dto.getDepartmentId() != null) {
+                        department = departmentService.getDepartmentById(dto.getDepartmentId());
+                    }
+                    // Priority 2: Check for Department Name
+                    else if (dto.getDepartmentName() != null && !dto.getDepartmentName().isEmpty()) {
+                        department = departmentService.getDepartmentByName(dto.getDepartmentName());
+                    }
+
+                    employee.setDepartment(department);
+                    return employee;
+                })
+                .collect(Collectors.toList());
+
+        // Use saveAll for efficient bulk insertion
+        return employeeRepository.saveAll(employeesToSave);
+
     }
 }
