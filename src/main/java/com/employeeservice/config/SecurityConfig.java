@@ -1,17 +1,15 @@
-package com.employeeservice.security;
+package com.employeeservice.config;
 
+import com.employeeservice.security.JwtAuthConverter;
+import com.employeeservice.security.OpaAuthorizationFilter;
+import com.employeeservice.security.OpaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
@@ -29,7 +27,19 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // CSRF is not needed for stateless REST APIs
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/health", "/public/**").permitAll()
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/public/**",
+                                // Swagger/OpenAPI endpoints - comprehensive list
+                                "/v3/api-docs/**",
+                                "/api-docs/**",
+                                "/api-docs/swagger-config",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/swagger-resources/**",
+                                "/webjars/**",
+                                "/swagger-ui/oauth2-redirect.html"
+                        ).permitAll()
                         .anyRequest().authenticated() // All other requests must be authenticated
                 )
                 .oauth2ResourceServer(oauth -> oauth

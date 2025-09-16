@@ -1,5 +1,6 @@
 package com.employeeservice.dto;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public class EmployeeResponseDto {
@@ -12,6 +13,7 @@ public class EmployeeResponseDto {
     private String state;
     private String pinCode;
     private String country;
+    private BigDecimal salary;
     private DepartmentDto department;
 
     // Constructors
@@ -47,4 +49,12 @@ public class EmployeeResponseDto {
 
     public DepartmentDto getDepartment() { return department; }
     public void setDepartment(DepartmentDto department) { this.department = department; }
+
+    public BigDecimal getSalary() {
+        return salary;
+    }
+
+    public void setSalary(BigDecimal salary) {
+        this.salary = salary;
+    }
 }
