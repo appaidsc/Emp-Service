@@ -17,6 +17,7 @@ public class EmployeeMapper {
         dto.setState(employee.getState());
         dto.setPinCode(employee.getPinCode());
         dto.setCountry(employee.getCountry());
+        dto.setSalary(employee.getSalary());
         if (employee.getDepartment() != null) {
             dto.setDepartment(DepartmentMapper.toDto(employee.getDepartment()));
         }
