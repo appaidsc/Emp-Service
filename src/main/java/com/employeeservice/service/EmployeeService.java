@@ -20,10 +20,12 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final DepartmentService departmentService;
+    private final KeycloakAdminClientService keycloakAdminClientService;
 
-    public EmployeeService(EmployeeRepository employeeRepository, DepartmentService departmentService) {
+    public EmployeeService(EmployeeRepository employeeRepository, DepartmentService departmentService, KeycloakAdminClientService keycloakAdminClientService) {
         this.employeeRepository = employeeRepository;
         this.departmentService = departmentService;
+        this.keycloakAdminClientService = keycloakAdminClientService;
     }
 
     public List<Employee> getEmployees() {
@@ -35,14 +37,7 @@ public class EmployeeService {
                 .orElseThrow(() -> new RuntimeException("Employee with id " + id + " not found"));
     }
 
-    @Transactional
-    public Employee createEmployee(Employee employee, UUID departmentId) {
-        if (departmentId != null) {
-            Department department = departmentService.getDepartmentById(departmentId);
-            employee.setDepartment(department);
-        }
-        return employeeRepository.save(employee);
-    }
+
 
     @Transactional
     public Employee updatePersonalInfo(UUID id, EmployeePersonalUpdateDto employeeDetails) {
@@ -112,33 +107,47 @@ public class EmployeeService {
         }
 
         employee.setDepartment(department);
-        return employeeRepository.save(employee);
+        Employee savedEmployee = employeeRepository.save(employee);
+        try{
+            keycloakAdminClientService.createKeycloakUser(savedEmployee);
+        }
+        catch (Exception e){
+            throw new RuntimeException("Unable to save employee with id " + savedEmployee.getId(),e);
+        }
+        return savedEmployee;
     }
 
     @Transactional
     public List<Employee> bulkCreateEmployees(List<EmployeeCreateDto> employeeDtos) {
+        // Step 1: Map DTOs to entities
         List<Employee> employeesToSave = employeeDtos.stream()
                 .map(dto -> {
-                    // Reuse the existing mapping and department logic
                     Employee employee = EmployeeMapper.fromCreateDto(dto);
 
                     Department department = null;
-                    // Priority 1: Check for Department ID
                     if (dto.getDepartmentId() != null) {
                         department = departmentService.getDepartmentById(dto.getDepartmentId());
-                    }
-                    // Priority 2: Check for Department Name
-                    else if (dto.getDepartmentName() != null && !dto.getDepartmentName().isEmpty()) {
+                    } else if (dto.getDepartmentName() != null && !dto.getDepartmentName().isEmpty()) {
                         department = departmentService.getDepartmentByName(dto.getDepartmentName());
                     }
-
                     employee.setDepartment(department);
                     return employee;
                 })
                 .collect(Collectors.toList());
 
-        // Use saveAll for efficient bulk insertion
-        return employeeRepository.saveAll(employeesToSave);
+        // Step 2: Save all employees in DB
+        List<Employee> insertedEmployees = employeeRepository.saveAll(employeesToSave);
 
+        // Step 3: Create users in Keycloak
+        try {
+            for (Employee emp : insertedEmployees) {
+                keycloakAdminClientService.createKeycloakUser(emp);
+            }
+        } catch (Exception e) {
+            // rollback DB if any Keycloak creation fails
+            throw new RuntimeException("Bulk Keycloak user creation failed. Rolling back employee inserts.", e);
+        }
+
+        return insertedEmployees;
     }
 }
