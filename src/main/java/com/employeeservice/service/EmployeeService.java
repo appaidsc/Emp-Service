@@ -8,6 +8,8 @@ import com.employeeservice.exception.ResourceNotFoundException;
 import com.employeeservice.mapper.EmployeeMapper;
 import com.employeeservice.repository.EmployeeRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,6 +23,9 @@ public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final DepartmentService departmentService;
     private final KeycloakAdminClientService keycloakAdminClientService;
+
+    private static final Logger logger = LoggerFactory.getLogger(EmployeeService.class);
+
 
     public EmployeeService(EmployeeRepository employeeRepository, DepartmentService departmentService, KeycloakAdminClientService keycloakAdminClientService) {
         this.employeeRepository = employeeRepository;
@@ -63,10 +68,16 @@ public class EmployeeService {
 
     @Transactional
     public void deleteEmployee(UUID id) {
-        if (!employeeRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Employee with id " + id + " not found");
+        Employee employeeToDelete = getEmployeeById(id);
+        String email = employeeToDelete.getEmail();
+
+        try{
+            keycloakAdminClientService.deleteKeycloakUser(email);
+        }catch(Exception e){
+            System.out.println("Could not delete user from Keycloak. " + e.getMessage());
         }
         employeeRepository.deleteById(id);
+
     }
 
     public List<Employee> searchEmployees(String firstName, String lastName , UUID departmentId) {
@@ -112,6 +123,7 @@ public class EmployeeService {
             keycloakAdminClientService.createKeycloakUser(savedEmployee);
         }
         catch (Exception e){
+            logger.error("Failed to create Keycloak user. Rolling back transaction.", e);
             throw new RuntimeException("Unable to save employee with id " + savedEmployee.getId(),e);
         }
         return savedEmployee;
@@ -119,11 +131,10 @@ public class EmployeeService {
 
     @Transactional
     public List<Employee> bulkCreateEmployees(List<EmployeeCreateDto> employeeDtos) {
-        // Step 1: Map DTOs to entities
+        // Step 1: Map all DTOs to employee entities
         List<Employee> employeesToSave = employeeDtos.stream()
                 .map(dto -> {
                     Employee employee = EmployeeMapper.fromCreateDto(dto);
-
                     Department department = null;
                     if (dto.getDepartmentId() != null) {
                         department = departmentService.getDepartmentById(dto.getDepartmentId());
@@ -135,19 +146,19 @@ public class EmployeeService {
                 })
                 .collect(Collectors.toList());
 
-        // Step 2: Save all employees in DB
-        List<Employee> insertedEmployees = employeeRepository.saveAll(employeesToSave);
+        // Step 2: Save all the new employees to the database in a single transaction
+        List<Employee> savedEmployees = employeeRepository.saveAll(employeesToSave);
 
-        // Step 3: Create users in Keycloak
+        // Step 3: Create a corresponding user in Keycloak for each new employee
         try {
-            for (Employee emp : insertedEmployees) {
-                keycloakAdminClientService.createKeycloakUser(emp);
+            for (Employee employee : savedEmployees) {
+                keycloakAdminClientService.createKeycloakUser(employee);
             }
         } catch (Exception e) {
-            // rollback DB if any Keycloak creation fails
-            throw new RuntimeException("Bulk Keycloak user creation failed. Rolling back employee inserts.", e);
+            // If any Keycloak user creation fails, throw an exception to trigger a transaction rollback
+            throw new RuntimeException("Bulk Keycloak user creation failed. Rolling back all employee inserts.", e);
         }
 
-        return insertedEmployees;
+        return savedEmployees;
     }
 }

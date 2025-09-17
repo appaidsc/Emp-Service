@@ -19,8 +19,7 @@ public class SwaggerConfig {
                 new Info()
                         .title("Employee Service API")
                         .description("Documentation Employee API v1.0")
-        )
-                .components(new SecurityRequirement().addList());
+                );
                 //.servers(List.of(new Server().url("http://localhost:8081").description("Employee Service API")));
     }
 }
