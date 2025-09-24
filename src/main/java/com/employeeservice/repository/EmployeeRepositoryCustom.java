@@ -1,6 +1,7 @@
 package com.employeeservice.repository;
 
 import com.employeeservice.dto.EmployeeResponseDto;
+import com.employeeservice.dto.EmployeeSearchCriteria;
 import com.employeeservice.entity.Employee;
 
 import java.math.BigDecimal;
@@ -14,6 +15,6 @@ public interface EmployeeRepositoryCustom {
 
     List<Employee> findBySalaryRange(BigDecimal minSalary, BigDecimal maxSalary);
 
-    List<Employee> findComplex(String email, String firstName, String lastName);
+    List<Employee> findComplex(EmployeeSearchCriteria criteria);
 
 }

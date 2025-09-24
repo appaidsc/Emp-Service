@@ -6,6 +6,11 @@ public class DepartmentDto {
     private UUID id;
     private String name;
 
+    public DepartmentDto(UUID id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
