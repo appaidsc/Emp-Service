@@ -1,7 +1,6 @@
 package com.employeeservice.service;
 
-import com.employeeservice.dto.EmployeeCreateDto;
-import com.employeeservice.dto.EmployeePersonalUpdateDto;
+import com.employeeservice.dto.*;
 import com.employeeservice.entity.Department;
 import com.employeeservice.entity.Employee;
 import com.employeeservice.exception.ResourceNotFoundException;
@@ -95,13 +94,35 @@ public class EmployeeService {
         return employeeRepository.findBySalaryRange(minSalary, maxSalary);
     }
 
-    public List<Employee> findEmployeesComplex(String email, String firstName, String lastName) {
-        // Handle cases where parameters might be missing, if necessary
-        if (email == null || firstName == null || lastName == null) {
-            // Depending on requirements, you could throw an exception or return an empty list
-            throw new IllegalArgumentException("All parameters (email, firstName, lastName) are required for this search.");
+    public List<EmployeeResponseDto> searchComplex (EmployeeSearchCriteria criteria) {
+        List<Employee> employees = employeeRepository.findComplex(criteria);
+
+        return employees.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+
+    private EmployeeResponseDto convertToDto(Employee employee) {
+        EmployeeResponseDto dto = new EmployeeResponseDto();
+        dto.setId(employee.getId());
+        dto.setFirstName(employee.getFirstName());
+        dto.setLastName(employee.getLastName());
+        dto.setEmail(employee.getEmail());
+        dto.setPhoneNumber(employee.getPhoneNumber());
+        dto.setCity(employee.getCity());
+        dto.setState(employee.getState());
+        dto.setSalary(employee.getSalary());
+
+        // Avoid a NullPointerException if an employee is not assigned to a department
+        if (employee.getDepartment() != null) {
+            // Get the Department entity from the Employee
+            Department departmentEntity = employee.getDepartment();
+
+            // Create a new DepartmentDto and set it on the EmployeeResponseDto
+            dto.setDepartment(new DepartmentDto(departmentEntity.getId(), departmentEntity.getName()));
         }
-        return employeeRepository.findComplex(email, firstName, lastName);
+        return dto;
     }
 
     @Transactional

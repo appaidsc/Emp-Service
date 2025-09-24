@@ -14,16 +14,7 @@ public class EmployeeCreateDto {
     private String country;
     private BigDecimal salary;
     private UUID departmentId;
-
-    public String getDepartmentName() {
-        return departmentName;
-    }
-
-    public void setDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
-    }
-
-    private String departmentName;
+    private String departmentName; // This is the correct declaration
 
     // Getters and setters
     public String getFirstName() { return firstName; }
@@ -55,4 +46,9 @@ public class EmployeeCreateDto {
 
     public UUID getDepartmentId() { return departmentId; }
     public void setDepartmentId(UUID departmentId) { this.departmentId = departmentId; }
+
+    public String getDepartmentName() { return departmentName; }
+    public void setDepartmentName(String departmentName) { this.departmentName = departmentName; }
+
+    // The duplicate declaration at the end has been removed.
 }

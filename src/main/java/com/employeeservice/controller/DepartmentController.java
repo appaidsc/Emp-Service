@@ -44,7 +44,7 @@ public class DepartmentController {
         // Save department
         Department savedDepartment = departmentService.createDepartment(department);
 
-        // Build location URI (assumes you have GET /departments/{id})
+        // Build location URI
         URI location = URI.create(String.format("/departments/%s", savedDepartment.getId()));
 
         // Return 201 Created + Location header + response body

@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,13 +34,6 @@ public class EmployeeController {
         Employee employee = employeeService.getEmployeeById(id);
         return ResponseEntity.ok(EmployeeMapper.toResponseDto(employee));
     }
-
-//    @PostMapping
-//    public ResponseEntity<EmployeeResponseDto> createEmployee(@RequestBody EmployeeCreateDto employeeDto) {
-//        Employee employee = EmployeeMapper.fromCreateDto(employeeDto);
-//        Employee savedEmployee = employeeService.createEmployee(employee, employeeDto.getDepartmentId());
-//        return ResponseEntity.ok(EmployeeMapper.toResponseDto(savedEmployee));
-//    }
 
     @PostMapping
     public ResponseEntity<EmployeeResponseDto> createEmployee(@RequestBody EmployeeCreateDto employeeDto) {
@@ -113,19 +105,12 @@ public class EmployeeController {
         return ResponseEntity.ok(dtos);
     }
 
-    @GetMapping("/search/complex")
-    public ResponseEntity<List<EmployeeResponseDto>> findComplex(
-            @RequestParam String email,
-            @RequestParam String firstName,
-            @RequestParam String lastName) {
+    @PostMapping("/search/complex")
+    public ResponseEntity<List<EmployeeResponseDto>> searchEmployeesComplex(
+            @RequestBody EmployeeSearchCriteria criteria) {
 
-        List<Employee> employees = employeeService.findEmployeesComplex(email, firstName, lastName);
-
-        List<EmployeeResponseDto> dtos = employees.stream()
-                .map(EmployeeMapper::toResponseDto) //
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(dtos);
+        List<EmployeeResponseDto> employees = employeeService.searchComplex(criteria);
+        return ResponseEntity.ok(employees);
     }
 
     @PostMapping("/bulk")

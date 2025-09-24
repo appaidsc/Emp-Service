@@ -1,12 +1,11 @@
 package com.employeeservice.repository;
 
+import com.employeeservice.dto.EmployeeSearchCriteria;
+import com.employeeservice.entity.Department;
 import com.employeeservice.entity.Employee;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -64,20 +63,45 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
     }
 
     @Override
-    public List<Employee> findComplex(String email, String firstName, String lastName) {
+    public List<Employee> findComplex(EmployeeSearchCriteria criteria) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Employee> cq = cb.createQuery(Employee.class);
-        Root<Employee> employee = cq.from(Employee.class); // Consistent naming
+        Root<Employee> employee = cq.from(Employee.class);
+        List<Predicate> predicates = new ArrayList<>();
 
-        Predicate firstNamePredicate = cb.equal(employee.get("firstName"), firstName);
-        Predicate lastNamePredicate = cb.equal(employee.get("lastName"), lastName);
-        Predicate nameOrPredicate = cb.or(firstNamePredicate, lastNamePredicate);
+        if(criteria.getFirstName() != null && !criteria.getFirstName().isEmpty()) {
+            predicates.add(cb.like(cb.lower(employee.get("firstName")), "%" + criteria.getFirstName().toLowerCase() + "%"));
+        }
+        if(criteria.getLastName() != null && !criteria.getLastName().isEmpty()) {
+            predicates.add(cb.like(cb.lower(employee.get("lastName")), "%" + criteria.getLastName().toLowerCase()+ "%"));
+        }
+        if(criteria.getEmail() != null && !criteria.getEmail().isEmpty()) {
+            predicates.add(cb.like(cb.lower(employee.get("email")), "%" + criteria.getEmail().toLowerCase()+ "%"));
+        }
+        if(criteria.getCity() != null && !criteria.getCity().isEmpty()) {
+            predicates.add(cb.like(cb.lower(employee.get("city")), criteria.getCity().toLowerCase()+ "%"));
+        }
+        if(criteria.getState() != null && !criteria.getState().isEmpty()) {
+            predicates.add(cb.like(cb.lower(employee.get("state")), criteria.getState().toLowerCase()+ "%"));
+        }
+        if(criteria.getCountry() != null && !criteria.getCountry().isEmpty()) {
+            predicates.add(cb.like(cb.lower(employee.get("country")), criteria.getCountry().toLowerCase()+ "%"));
+        }
+        if(criteria.getSalaryFrom() != null && criteria.getSalaryTo() != null){
+            predicates.add(cb.between(employee.get("salary"), criteria.getSalaryFrom(), criteria.getSalaryTo()));
+        } else if (criteria.getSalaryFrom() != null) {
+            predicates.add(cb.greaterThan(employee.get("salary"), criteria.getSalaryFrom()));
+        } else if (criteria.getSalaryTo() != null) {
+            predicates.add(cb.lessThan(employee.get("salary"), criteria.getSalaryTo()));
+        }
+        if (criteria.getDepartmentName() != null && !criteria.getDepartmentName().isEmpty()) {
+            Join<Employee, Department> departmentJoin = employee.get("department");
+            predicates.add(cb.like(cb.lower(departmentJoin.get("name")), "%" + criteria.getDepartmentName().toLowerCase()+ "%"));
+        }
 
-        Predicate emailPredicate = cb.equal(employee.get("email"), email);
-
-        Predicate finalPredicate = cb.and(nameOrPredicate, emailPredicate);
-        cq.where(finalPredicate);
-
+        cq.where(predicates.toArray(new Predicate[0]));
         return entityManager.createQuery(cq).getResultList();
+
     }
+
 }
