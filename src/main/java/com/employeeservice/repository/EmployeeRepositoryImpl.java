@@ -6,6 +6,7 @@ import com.employeeservice.entity.Employee;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.*;
+import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -95,7 +96,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
             predicates.add(cb.lessThan(employee.get("salary"), criteria.getSalaryTo()));
         }
         if (criteria.getDepartmentName() != null && !criteria.getDepartmentName().isEmpty()) {
-            Join<Employee, Department> departmentJoin = employee.get("department");
+            Join<Employee, Department> departmentJoin = employee.join("department");
             predicates.add(cb.like(cb.lower(departmentJoin.get("name")), "%" + criteria.getDepartmentName().toLowerCase()+ "%"));
         }
 

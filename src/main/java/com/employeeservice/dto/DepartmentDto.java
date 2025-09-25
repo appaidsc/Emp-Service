@@ -11,6 +11,10 @@ public class DepartmentDto {
         this.name = name;
     }
 
+    public DepartmentDto() {
+        
+    }
+
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
